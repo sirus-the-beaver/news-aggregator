@@ -16,7 +16,10 @@ def search(search_term):
     # Set up driver
 
     # Only load HTML
+    WINDOW_SIZE = "1920,1080"
     options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--window-size=%s" % WINDOW_SIZE)
     options.page_load_strategy = 'eager'
     driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
     driver.get(URL)
@@ -30,6 +33,10 @@ def search(search_term):
         article = driver.find_element(By.CLASS_NAME, "container__link")
         article.click()
 
+    except TimeoutException as e:
+        print("Page took too long to load")
+        results = None
+
     finally:
         current_url = driver.current_url
 
@@ -41,8 +48,9 @@ def search(search_term):
             page = requests.get(current_url)
             soup = BeautifulSoup(page.content, 'html.parser')
             headline = soup.find('h1')
+            timestamp = soup.find(class_='timestamp')
             text = soup.find_all(class_='paragraph')
-            results = (headline.get_text(), text)
+            results = (headline, timestamp, text)
 
         driver.quit()
 
