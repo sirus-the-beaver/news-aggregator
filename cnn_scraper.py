@@ -8,7 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from bs4 import BeautifulSoup
 
-def search(search_term):
+def search_cnn(search_term):
 
     # Get search term from user
     URL = "https://www.cnn.com/search?q=" + search_term + "&from=0&size=10&page=1&sort=newest&types=all&section="
@@ -34,8 +34,8 @@ def search(search_term):
         article.click()
 
     except TimeoutException as e:
-        print("Page took too long to load")
-        results = None
+        results = "Page took too long to load"
+        return results
 
     finally:
         current_url = driver.current_url
@@ -44,13 +44,13 @@ def search(search_term):
             results = None
 
         else:
-            print("Article found at: " + current_url)
+            link = "Article found at: " + current_url
             page = requests.get(current_url)
             soup = BeautifulSoup(page.content, 'html.parser')
             headline = soup.find('h1')
             timestamp = soup.find(class_='timestamp')
             text = soup.find_all(class_='paragraph')
-            results = (headline, timestamp, text)
+            results = (headline, timestamp, text, link)
 
         driver.quit()
 
